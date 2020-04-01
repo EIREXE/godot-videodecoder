@@ -7,7 +7,7 @@ opts = Variables()
 opts.Add(BoolVariable('debug','debug build',True))
 opts.Add(BoolVariable('test','copy output to test project',True))
 opts.Add(EnumVariable('platform','can be osx, linux (x11) or windows (win64)','',('osx','x11','win64'),
-                                        map={'linux':'x11','windows':'win64'})) 
+                                        map={'linux':'x11','windows':'win64'}))
 
 osx_renamer = Builder(action = './renamer.py '+ os.environ.get('PWD') +'/thirdparty/lib/ @loader_path/ $SOURCE')
 env = Environment(variables=opts, BUILDERS={'OSXRename':osx_renamer})
@@ -19,7 +19,6 @@ if env['debug']:
 
 if env['platform'] == 'x11':
     env.Append(RPATH=env.Literal('\$$ORIGIN/lib/'))
-
 env.Append(CPPPATH=['#thirdparty/include/'])
 env.Append(CPPPATH=['#godot_include'])
 
@@ -50,4 +49,3 @@ if env['test']:
     for dylib in installed_dylib:
         env.Install('#test/addons/'+output_path[1:],dylib);
     env.Install('#test/addons/'+output_path[1:], output_dylib)
-
