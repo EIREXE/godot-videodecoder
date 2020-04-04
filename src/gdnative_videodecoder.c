@@ -190,6 +190,11 @@ static int _interleave_audio_frame(float *dest, AVFrame *audio_frame) {
 	return audio_frame->nb_samples;
 }
 
+// There are some types of audio extensions that we do not want to set as supported extensions
+// this is because if we do otherwise godot will load them as VideoStreamGDNative which makes them
+// unusable as audio
+const char *extension_blacklist[] = {"ogg", "wav", NULL};
+
 static void _update_extensions() {
 	if (num_supported_ext > 0) return;
 
@@ -202,8 +207,20 @@ static void _update_extensions() {
 			strcpy(exts, current_fmt->extensions);
 			char *token = strtok(exts, ",");
 			while (token != NULL) {
-				sup_ext_set = set_insert(sup_ext_set, token);
+				int i = 0;
+				int blacklisted = 0;
+				while (extension_blacklist[i] != NULL) {
+					if (strcmp(extension_blacklist[i], token) == 0) {
+						blacklisted = 1;
+						break;
+					}
+					i++;
+				}
+				if (blacklisted == 0) {
+					sup_ext_set = set_insert(sup_ext_set, token);
+				}
 				token = strtok(NULL, ", ");
+
 			}
 			api->godot_free(exts);
 			if (current_fmt->mime_type) {
